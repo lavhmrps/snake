@@ -46,11 +46,11 @@
 		init : function(){
 			this.size = 10;
 			this.length =1;
-			this.score =0;
+			this.score = 0;
 			this.scoreCount=0;
 			this.pos=[{x:100,y:100,d:dir.right},{x:90,y:100,d:dir.right}];
 			this.dir = dir.right;
-			this.speed = 10;
+			this.speed = parseInt(localStorage.getItem("speed")) || 5;
 
 			this.startTime = new Date();
 			this.lastPoint = this.startTime;
@@ -58,27 +58,28 @@
 			food = null;
 			foodValue = 10;
 			
+			this.scoreFontsize = 400;
 			tipY = height+100;
 
 		},
 		update : function(){
+
+
 			var s = this;
 
+			// Spawn food in a non-occupied location
 			if(food === null){
 				do{
 					var foodSpawnOK = true, fx, fy;
 					fx = Math.floor(Math.random()*width/this.size)*this.size;
 					fy = Math.floor(Math.random()*height/this.size)*this.size;
 
-					//console.log(foodSpawnOK+": "+fx+", "+fy);
 					for(var i=0; i<this.length; i++){
 						var sx = this.pos[i].x;
 						var sy = this.pos[i].y;
 
 						if(fx+this.size > sx && fx < sx+this.size && fy+this.size >sy && fy < sy+this.size){
-						//if(fx+this.speed > sx && fx < sx+this.speed && fy+this.speed >sy && fy < sy+this.speed){
 							foodSpawnOK = false;
-							console.log("foodspawn crash, Try again");
 							break;
 						}
 					}
@@ -97,6 +98,7 @@
 
 			var bx = this.pos[1].x;
 			var by = this.pos[1].y;
+
 			for(var i=1; bx !== undefined ; i++){
 				
 				this.pos[i].x = ax;
@@ -110,10 +112,7 @@
 
 				bx = this.pos[i+1].x;
 				by = this.pos[i+1].y;
-
-
 			}
-
 			
 			// update head
 			switch(s.dir){
@@ -121,35 +120,31 @@
 					if(s.pos[0].x <= 0)
 						s.pos[0].x = width;
 					s.pos[0].x -= this.speed;	
-					//s.pos[0].x -= 10;	
 					break;
 
 				case dir.up:
 					if(s.pos[0].y <= 0)
 						s.pos[0].y = height;
 					s.pos[0].y -=this.speed;
-					// s.pos[0].y -=10;
 					break;
 
 				case dir.right:
-					if(s.pos[0].x >= width)
+					if(s.pos[0].x >= width-this.size)
 						s.pos[0].x = -10;
 					s.pos[0].x += this.speed;
-					// s.pos[0].x += 10;
 					break;
 
 				case dir.down:
-					if(s.pos[0].y >= height)
-						s.pos[0].y = 0;
+					if(s.pos[0].y >= height-this.size)
+						s.pos[0].y = -this.speed;
 					s.pos[0].y += this.speed;
-					// s.pos[0].y += 10;
 					break;
 			}
 
 			// check collision
 			var hx = this.pos[0].x;
 			var hy = this.pos[0].y;
-			for(var i=1; i<this.length; i++){
+			for(var i=2; i<this.length; i++){
 				var bx = this.pos[i].x;
 				var by = this.pos[i].y;
 
@@ -200,16 +195,25 @@
 			}
 
 			// Write score to screen
+			
+
 			ctx.save();
 			ctx.fillStyle = "rgba(100,100,100,.2)";
-			ctx.font = "bold 300px monospace";
-			if(frames%3==0 && snake.scoreCount < snake.score)
+			if(frames % 3 == 0 && snake.scoreCount < snake.score)
 				snake.scoreCount++;
-			
-			var strScore  = snake.scoreCount;
-			var txtWidth = ctx.measureText(strScore).width;
 
+			ctx.font = "bold "+ this.scoreFontsize +"px monospace";
+			var txtWidth = ctx.measureText(snake.scoreCount).width;
+			var strScore  = snake.scoreCount+" ";
+			// fit text to screen
+			if(txtWidth > (width -20)){
+				console.log(this.scoreFontsize+" "+txtWidth+" > "+width);
+				this.scoreFontsize -= 1
+				ctx.font = "bold "+ this.scoreFontsize +"px monospace";
+				txtWidth = ctx.measureText(snake.scoreCount).width;
+			}
 			ctx.fillText(strScore,width/2-txtWidth/2,300);
+
 			ctx.restore();
 
 			// Write tips 
@@ -325,7 +329,6 @@
 
 	function onKeydown(e){
 		var k = e.which;
-		console.log(k);
 		switch(k){
 			case 13: // ENTER
 				if(currentstate === states.Pause)
@@ -366,6 +369,10 @@
 			case 189: // MINUS
 				snake.speed -= snake.speed > 1 ? 1:0;
 				break;
+		}
+
+		if(k === 107 || k === 187 || k === 109 || k === 189 ){
+			localStorage.setItem("speed",snake.speed);
 		}
 	}
 
