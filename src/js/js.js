@@ -325,6 +325,7 @@
 
 	function onKeydown(e){
 		var k = e.which;
+		console.log(k);
 		switch(k){
 			case 13: // ENTER
 				if(currentstate === states.Pause)
@@ -336,26 +337,33 @@
 					currentstate = states.Play;
 
 				}
-			case 37:
+				break;
+			case 37: 	// LEFT
 				if(snake.dir !== dir.right)
 					snake.dir = dir.left;
 				break;
-			case 38:
+			case 38: 	// UP
 				if(snake.dir !== dir.down)
 					snake.dir = dir.up;
 				break;
-			case 39:
+			case 39: 	// RIGHT
 				if(snake.dir !== dir.left)
 					snake.dir = dir.right;
 				break;
-			case 40:
+			case 40: 	// DOWN
 				if(snake.dir !== dir.up)
 					snake.dir = dir.down;
 				break;
 			case 107: // PLUS
 				snake.speed += snake.speed < 10 ? 1:0;
 				break; 
+			case 187: // PLUS
+				snake.speed += snake.speed < 10 ? 1:0;
+				break; 
 			case 109: // MINUS
+				snake.speed -= snake.speed > 1 ? 1:0;
+				break;
+			case 189: // MINUS
 				snake.speed -= snake.speed > 1 ? 1:0;
 				break;
 		}
